@@ -1,0 +1,2 @@
+- path: '/'
+  handler: 'slam.controller.welcome'

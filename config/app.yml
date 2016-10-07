@@ -1,0 +1,67 @@
+parameters:
+  httpVersion: '1.1'
+  responseChunkSize: 4096
+  outputBuffering: 'append'
+  determineRouteBeforeAppMiddleware: false
+  displayErrorDetails: true
+  addContentLengthHeader: true
+  routerCacheFile: false
+
+  routes_file: '%config_dir%/routes.yml'
+
+services:
+  # Slim Services
+  settings:
+    synthetic: true
+
+  environment:
+    synthetic: true
+
+  callableResolver:
+    synthetic: true
+
+  request:
+    class: 'Psr\Http\Message\ServerRequestInterface'
+    factory: ['Slim\Http\Request', 'createFromEnvironment']
+    arguments:
+      - '@environment'
+
+  response:
+    class: 'Slim\Http\Response'
+
+  router:
+    class: 'Slim\Router'
+    configurator: ['@slam.configurator.router', 'configure']
+
+  foundHandler:
+    class: 'Slim\Handlers\Strategies\RequestResponse'
+
+  phpErrorHandler:
+    class: 'Slim\Handlers\PhpError'
+    arguments:
+      - '%displayErrorDetails'
+
+  errorHandler:
+    class: 'Slim\Handlers\Error'
+    arguments:
+      - '%displayErrorDetails'
+
+  notFoundHandler:
+    class: 'Slim\Handlers\NotFound'
+    arguments:
+      - '%displayErrorDetails'
+
+  notAllowedHandler:
+    class: 'Slim\Handlers\NotAllowed'
+    arguments:
+      - '%displayErrorDetails'
+
+  # Slam Services
+  slam.configurator.router:
+    class: 'Slam\Configurator\RouterConfigurator'
+    arguments:
+      - '@callableResolver'
+      - '%routes_file%'
+
+  slam.controller.welcome:
+    class: 'Slam\Controller\WelcomeController'
